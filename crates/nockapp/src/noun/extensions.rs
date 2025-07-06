@@ -106,13 +106,17 @@ impl AtomExt for Atom {
     }
 
     fn to_bytes_until_nul(self) -> Result<Vec<u8>> {
-        let bytes = str::from_utf8(self.as_ne_bytes())?;
-        Ok(bytes.trim_end_matches('\0').as_bytes().to_vec())
+        let bytes = self.as_ne_bytes();
+        let end_pos = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
+        Ok(bytes[..end_pos].to_vec())
     }
 
     fn into_string(self) -> Result<String> {
-        let str = str::from_utf8(self.as_ne_bytes())?;
-        Ok(str.trim_end_matches('\0').to_string())
+        let bytes = self.as_ne_bytes();
+        let end_pos = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
+        let trimmed_bytes = &bytes[..end_pos];
+        let str = str::from_utf8(trimmed_bytes)?;
+        Ok(str.to_string())
     }
 }
 
